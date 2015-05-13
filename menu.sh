@@ -17,7 +17,7 @@ clear
 printf " \033[1m ${red} \n Setting Things Up First \n \033[0m "
 cd "$HOME"
 pacman -Syy git --noconfirm
-git clone https://github.com/i3-Arch/Arch-Installer.git
+git clone https://github.com/trewchainz/Arch-Installer.git
 cp "$scriptdir"/* "$HOME"/
 rm -rf "$scriptdir"
 
