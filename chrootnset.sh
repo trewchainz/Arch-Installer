@@ -104,6 +104,23 @@ localeStuff() {
 	locale > /etc/locale.conf  # set systemwide locale's
 }
 
+setLUKSmkinitcpio() {
+	sed -e "52s/keyboard//" /etc/mkinitcpio.conf
+	sed -e "52s/filesystems/keyboard encrypt filesystems/" /etc/mkinitcpio.conf
+}
+
+setLUKSgrub() {
+	echo 'crypdevice=$rewtpart:cryptroot' >> /boot/grub/grub.cfg
+}
+
+setCrypttab() {
+	echo 'home $homepart none luks' >> /etc/crypttab
+	if [ leetchoice = true ]
+		then
+		echo 'cryptswap			/dev/sda4			/dev/urandom		swap,cipher=aes-cbc-essiv:sha256,size=256' >> /etc/crpyttab
+	fi
+}
+
 # Main Function
 main() {
 	hostname

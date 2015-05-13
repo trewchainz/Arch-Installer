@@ -80,6 +80,15 @@ ASKme() {
 	echo "thechoiceman=$thechoiceman" >> config.sh
 }
 
+LUKSoption() {
+	printf "\033[1m \n${green}Would you like to enable LUKS encryption? ${white}\033[0m [Y]es or [N]o"
+	read lukschoice
+	if [lukschoice == "Y" -o "y"]
+		then
+		luks = true
+	fi
+}
+
 SMALLpart() {
 	printf " \033[1m ${white}\n Enter your Boot Partition: ${red}i.e. ${green}/dev/sda1 \n \033[0m"
     	printf " \033[1m \n ${yellow}Boot Partition: ${white}\033[0m"    
@@ -121,18 +130,45 @@ FULLpart() {
 	printf " \033[1m \n ${yellow}Root Partition: ${white}\033[0m"
 	read rewtpart
 	echo "rewtpart=$rewtpart" >> config.sh
-	mkfs.ext4 "$rewtpart" -L rootfs
+	if [luks = false]
+		then
+		mkfs.ext4 "$rewtpart" -L rootfs
+	else
+		cryptsetup -y -oluksFormat $rewtpart
+		cryptsetup open $rewtpart cryptroot
+		mkfs -t ext4 /dev/mapper/cryptroot /mnt
+	fi
 	printf " \033[1m \n ${white}Enter your Home Partition: ${red}i.e. /dev/sda3 \n \033[0m"
 	printf "\033[1m \n ${yellow}Home Partition: ${white}\033[0m"
 	read homepart
 	echo "homepart=$homepart" >> config.sh
-	mkfs.ext4 "$homepart"
+	if [luks = false]
+		then
+		mkfs.ext4 "$homepart"
+	else
+		cryptsetup -y -v luksFormat $homepart
+		cryptsetup open $homepart crypthome
+		mkfs -t ext4 /dev/mapper/crypthome
+	fi
 	printf "\033[1m \n ${white}Enter your Swap Partition: ${red}i.e. /dev/sda4 \n \033[0m"
 	printf "\033[0m \n ${yellow}Swap Partition: ${white}\033[0m"
 	read swappart
 	echo "swappart=$swappart" >> config.sh
-	mkswap -U 13371337-0000-4000-0000-133700133700 $swappart
-	swapon $swappart
+	if [luks = false]
+		then
+		mkswap -U 13371337-0000-4000-0000-133700133700 $swappart
+		swapon $swappart
+	else
+		printf "\033[0m \n ${yellow}Do you want a regenerating key on your swap for coldboot attack immunity? ${white}\033[0m"
+		printf "\033[1m \n${green}WARNING: Hibernation is not supported when you choose this option! ${white}\033[0m"
+		read leetchoice		#used later to echo regen line in /etc/crypttab
+		mkswap -U 13371337-0000-4000-0000-133700133700 $swappart
+		cryptsetup -y -v luksFormat $swappart
+		cryptsetup open $swappart cryptswap
+		swapon $swappart
+	fi
+	echo "luks=$luks" >> config.sh
+	echo "leetchoice=$leetchoice" >> config.sh
 	echo "FULLpart=696" >> config.sh
 }
 
@@ -222,15 +258,16 @@ sixfour() {
 main() {
 	checkdat
 	banner
-	touch config.sh 		## Create file to store bootpart, rewtpart, homepart, swappart for chroot
+	touch config.sh 	## Create file to store bootpart, rewtpart, homepart, swappart for chroot
 	ASKme				## ASK NUMBER OF PARTITIONS
+	LUKSoption			## Prompt for LUKS option
 	disk 				## PARTITION WITH CFDISK or FDISK
-    	CALLpart 	 		## CALL PARTITIONING IF STATEMENT
-	pkgmntchroot 	 		## Setup packages and mounts, then chroot hook for additional setup w/ chrootnset.shh
-	sixfour
-	cp issue /mnt/etc/issue   	## TTY ART 
-	postsetup			## POST INSTALL SCRIPT READY FOR AFTER INSTALL
-	umount -R /mnt	2> /dev/null		## UNMOUNT 
+    CALLpart 	 		## CALL PARTITIONING IF STATEMENT
+	pkgmntchroot 	 	## Setup packages and mounts, then chroot hook for additional setup w/ chrootnset.shh
+	sixfour				## Setup pacman for 64bit
+	cp issue /mnt/etc/issue   		## TTY ART 
+	postsetup						## POST INSTALL SCRIPT READY FOR AFTER INSTALL
+	umount -R /mnt	2> /dev/null	## UNMOUNT 
 	clear
 	printf "\033[1m \n ${green} COMPLETE !  \n \033[0m"
 	printf "\033[1m \n ${yellow} SHUT DOWN SYSTEM AND THEN \n \033[0m"
