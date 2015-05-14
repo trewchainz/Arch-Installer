@@ -1,4 +1,4 @@
-sub#!/bin/bash
+#!/bin/bash
 #
 # 	Authors ::->>	 i3-Arch, trewchainz, t60r  <<-::
 #
