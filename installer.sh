@@ -1,4 +1,4 @@
-#!/bin/bash
+sub#!/bin/bash
 #
 # 	Authors ::->>	 i3-Arch, trewchainz, t60r  <<-::
 #
@@ -136,14 +136,14 @@ FULLpart() {
 	else
 		cryptsetup -y luksFormat $rewtpart
 		cryptsetup open $rewtpart cryptroot
-		mkfs -t ext4 /dev/mapper/cryptroot /mnt
+		mkfs -t ext4 /dev/mapper/cryptroot
 	fi
 	printf " \033[1m \n ${white}Enter your Home Partition: ${red}i.e. /dev/sda3 \n \033[0m"
 	printf "\033[1m \n ${yellow}Home Partition: ${white}\033[0m"
 	read homepart
 	echo "homepart=$homepart" >> config.sh
 	if [ "$luks" = false ]
-		then
+	then
 		mkfs.ext4 "$homepart"
 	else
 		cryptsetup -y -v luksFormat $homepart
@@ -175,12 +175,18 @@ FULLpart() {
 pkgmntchroot() {
 	clear
 	printf " \033[1m ${green} Setting up install... ${white}\n\033[0m "
-	mount $rewtpart /mnt
 	mkdir /mnt/home
 	mkdir /mnt/boot
 	mkdir -pv /mnt/var/lib/pacman
-	mount $bootpart /mnt/boot
-	mount $homepart /mnt/home
+	if [ "$thechoiceman" -eq 3 && "$luks" = false ]; then
+		mount $rewtpart /mnt
+		mount $bootpart /mnt/boot
+		mount $homepart /mnt/home
+	else
+		mount -t ext4 /dev/mapper/cryptswap
+		mount -t ext4 /dev/mapper/cryptroot
+		mount -t ext4 /dev/mapper/crypthome
+	fi
 	pacstrap /mnt base base-devel grub os-prober rsync wget
 	rsync -rav /etc/pacman.d/gnupg/ /mnt/etc/pacman.d/gnupg/
 	genfstab -p -U /mnt >> /mnt/etc/fstab
