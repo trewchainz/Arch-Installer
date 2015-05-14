@@ -110,7 +110,7 @@ setLUKSmkinitcpio() {
 }
 
 setLUKSgrub() {
-	echo 'crypdevice=$rewtpart:cryptroot' >> /boot/grub/grub.cfg
+	echo 'cryptdevice=$rewtpart:cryptroot' >> /boot/grub/grub.cfg
 }
 
 setCrypttab() {
