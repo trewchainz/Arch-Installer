@@ -85,7 +85,9 @@ LUKSoption() {
 	read lukschoice
 	if [ "$lukschoice" == Y -o "$lukschoice" == y ]
 		then
-		luks = true
+		luks="true"
+	else
+		luks="false"
 	fi
 }
 
