@@ -85,7 +85,9 @@ LUKSoption() {
 	read lukschoice
 	if [ "$lukschoice" == Y -o "$lukschoice" == y ]
 		then
-		luks = true
+		luks="true"
+	else
+		luks="false"
 	fi
 }
 
@@ -268,7 +270,7 @@ main() {
 	ASKme				## ASK NUMBER OF PARTITIONS
 	LUKSoption			## Prompt for LUKS option
 	disk 				## PARTITION WITH CFDISK or FDISK
-    CALLpart 	 		## CALL PARTITIONING IF STATEMENT
+        CALLpart 	 		## CALL PARTITIONING IF STATEMENT
 	pkgmntchroot 	 	## Setup packages and mounts, then chroot hook for additional setup w/ chrootnset.shh
 	sixfour				## Setup pacman for 64bit
 	cp issue /mnt/etc/issue   		## TTY ART 
