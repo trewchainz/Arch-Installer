@@ -41,9 +41,9 @@ cat <<"EOT"
 	 #     # #   #  #    # #    # #      # #   ## #    #  #  #     ###
 	 #     # #    #  ####  #    # ###### # #    #  ####  #    #    ###
 EOT
-	printf "		########################################\n"
-	printf "		##   Installer Version:  "$Version"   ##\n"
-	printf "		########################################\n\n"
+	printf "		######################################## \n"
+	printf "		##   Installer Version:  "$Version"   ## \n"
+	printf "		######################################## \n\n"
 	sleep 3
 }
 
@@ -130,11 +130,11 @@ FULLpart() {
 	printf " \033[1m \n ${yellow}Root Partition: ${white}\033[0m"
 	read rewtpart
 	echo "rewtpart=$rewtpart" >> config.sh
-	if [$luks = false]
+	if [ "$luks" = false ]
 		then
 		mkfs.ext4 "$rewtpart" -L rootfs
 	else
-		cryptsetup -y -luksFormat $rewtpart
+		cryptsetup -y luksFormat $rewtpart
 		cryptsetup open $rewtpart cryptroot
 		mkfs -t ext4 /dev/mapper/cryptroot /mnt
 	fi
@@ -142,7 +142,7 @@ FULLpart() {
 	printf "\033[1m \n ${yellow}Home Partition: ${white}\033[0m"
 	read homepart
 	echo "homepart=$homepart" >> config.sh
-	if [$luks = false]
+	if [ "$luks" = false ]
 		then
 		mkfs.ext4 "$homepart"
 	else
@@ -154,7 +154,7 @@ FULLpart() {
 	printf "\033[0m \n ${yellow}Swap Partition: ${white}\033[0m"
 	read swappart
 	echo "swappart=$swappart" >> config.sh
-	if [$luks = false]
+	if [ "$luks" = false ]
 		then
 		mkswap -U 13371337-0000-4000-0000-133700133700 $swappart
 		swapon $swappart
