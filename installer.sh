@@ -134,7 +134,7 @@ FULLpart() {
 		then
 		mkfs.ext4 "$rewtpart" -L rootfs
 	else
-		cryptsetup -y -oluksFormat $rewtpart
+		cryptsetup -y -luksFormat $rewtpart
 		cryptsetup open $rewtpart cryptroot
 		mkfs -t ext4 /dev/mapper/cryptroot /mnt
 	fi
