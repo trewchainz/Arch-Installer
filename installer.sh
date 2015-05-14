@@ -81,9 +81,9 @@ ASKme() {
 }
 
 LUKSoption() {
-	printf "\033[1m \n${green}Would you like to enable LUKS encryption? ${white}\033[0m [Y]es or [N]o"
+	printf "\033[1m \n${green}Would you like to enable LUKS encryption? ${white}\033[0m [Y]es or [N]o\n Choice: "
 	read lukschoice
-	if [lukschoice == "Y" -o "y"]
+	if ["$lukschoice" == "Y" -o "$lukschoice" == "y"]
 		then
 		luks = true
 	fi
